@@ -31,7 +31,13 @@ If you add the next line to your groovy script:
 
 it will create start start scripts (bat and bash).  You can also use -DCreateStartScripts=true with your java command.
 
-You can also embed you groovy script into the jar file with the jar command:
+You can also embed your groovy script into the jar file 
+
+(which means you could email a single tiny jar file and 
+a user would only have to double click on the emailed jar to run your embedded groovy script 
+[obviously user would have to have Java installed on their computer]) 
+
+with the jar command:
 
 jar -uf alpha.jar alpha.groovy
 
@@ -40,7 +46,7 @@ To extract alpha.groovy from alpha.jar use the jar command:
 jar -xf alpha.jar alpha.groovy
 
 When the jar file starts running 
-it first looks for an external groovy file with the same name as the jar file. If an external
+it first looks for an external groovy file with the same name (excluding file extension) as the jar file. If an external
 script file is not found it will look for one embedded in the jar file. If no script files
 are found (external and internal to the jar) the jar file defaults to just being a generic 
 groovy script runner (1st arg should be the path to a groovy file or an http based url).
