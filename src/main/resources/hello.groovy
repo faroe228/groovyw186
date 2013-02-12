@@ -1,1 +1,0 @@
-println "### hello from hello.groovy"
