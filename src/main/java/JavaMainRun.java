@@ -202,9 +202,16 @@ public class JavaMainRun {
 
         String sGroovyCode = new Scanner( groovyScriptUrl.openStream() ).useDelimiter("\\A").next();
 
+        boolean sysPropCreateStartScriptsExists =  System.getProperty("CreateStartScripts") != null;
+        String  sysPropCreateStartScriptsValue = "";
+        if (sysPropCreateStartScriptsExists) {
+            sysPropCreateStartScriptsValue = System.getProperty("CreateStartScripts").trim();
+        }
+        boolean sysPropCreateStartScripts = sysPropCreateStartScriptsValue.trim().toLowerCase().equals("true");
+
         // ### createStartScripts ###
         if ( isWorkingDirSameAsJarDir ) {
-            if ( sGroovyCode.contains("#CreateStartScripts=true#") ) {
+            if (sGroovyCode.contains("#CreateStartScripts=true#") || sysPropCreateStartScripts) {
                 createStartScripts();
             }
         }
