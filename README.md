@@ -26,7 +26,9 @@ Step2 - Run by double clicking on the alpha.jar file or do the command line: jav
 Note: The jar and the groovy script file should be in the same directory/folder.
 
 If you add the next line to your groovy script:
+
 // #CreateStartScripts=true#
+
 it will create start start scripts (bat and bash).  You can also use -DCreateStartScripts=true with your java command.
 
 You can also embed you groovy script into the jar file with the jar command:
