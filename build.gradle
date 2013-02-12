@@ -1,0 +1,115 @@
+project.ext.gi = groovy.inspect.swingui.ObjectBrowser.&inspect;
+
+apply plugin: 'java'
+
+apply plugin: 'application'
+mainClassName = "JavaMainRun"
+
+apply plugin: 'idea'
+
+Project getTheProject() { return project }  // for code completion
+
+sourceSets {
+    main {
+        resources {
+            exclude '**/*.lnk'
+        }
+    }
+}
+
+//
+task wrapper(type: Wrapper) { gradleVersion = '1.4' }
+if ( files('gradlew', 'gradlew.bat').collect{!it.exists()}.any() ) {
+	project.tasks.wrapper.execute()
+}
+//
+
+run.dependsOn('cleanJar','jar');
+
+jar {
+    manifest {
+        attributes(
+                  'Main-Class': 'JavaMain'
+                , 'SplashScreen-Image': 'splash/loading6.gif'
+                , 'Class-Path': '.'
+        )
+    }
+}
+
+jar.doLast {
+    ant.delete( file: jar.archivePath.name )
+    // ant.copy( verbose: 'true', file: archivePath.toString(), todir: '.' )
+    ant.copy( verbose: 'true', file: archivePath.toString(), tofile: new File("test.jar").toString() );
+    ant.copy( verbose: 'true', file: archivePath.toString(), todir: '.' );
+}
+
+
+task("go", dependsOn:["cleanJar", "jar"]) << {
+    // ant.java( jar: archivePath.name )
+    ant.exec( executable: 'cmd' ) {
+        arg( line: '/c r.bat' )
+    }
+}
+
+def ivyGenerateGroovyCpForceRunClosure = {
+    this.run( file("buildHelpers/IvyGenerateGroovyCp.groovy"), ['--forceRun'] as String[] )
+}
+
+cleanProcessResources.doFirst {
+    ivyGenerateGroovyCpForceRunClosure();
+}
+
+task("goDebug", dependsOn:["cleanProcessResources", "cleanJar", "jar"]) << {
+    def testJarFile = new File('test.jar').canonicalFile;
+    assert testJarFile.exists()
+
+    Thread.start {
+        def cl = new URLClassLoader( [
+                // jar.archivePath.toURI().toURL()
+                // new File( jar.archivePath.name ).toURI().toURL()
+                testJarFile.toURI().toURL()
+            ] as URL[], null );
+        Thread.currentThread().setContextClassLoader( cl );
+        Class cls = cl.loadClass( mainClassName );
+        cls.main( "test.groovy" );
+    }.join();
+
+}
+
+//task("createPathTextFiles") {
+  //  this.evaluate( file("./buildHelpers/IvyGenerateGroovyCp.groovy") );
+//}
+
+// processResources.dependsOn( 'createPathTextFiles' )
+
+/*
+clean.doLast {
+    println "### cleaning ..."
+    ant.delete( file: 'src/main/resources/mavenUrls.txt' )
+    ant.delete( file: 'src/main/resources/ivyPaths.txt' )
+}
+*/
+
+clean.doLast {
+    String theDir = 'src/main/resources/generated'
+    ant.delete(dir: theDir)
+    ant.mkdir(dir: theDir)
+
+    // this.evaluate( file("./buildHelpers/IvyGenerateGroovyCp.groovy") );
+    ivyGenerateGroovyCpForceRunClosure();
+
+    //this.ru
+}
+
+theProject.getGradle().buildFinished {
+    def calcVisibleFrames = { java.awt.Frame.getFrames().findAll { it.visible } }
+    while( calcVisibleFrames().size() > 0 ) {
+        Thread.sleep 250;
+    }
+}
+
+task("t1") << {
+    this.run( file('tmp.groovy') )
+}
+
+
